@@ -8,11 +8,12 @@
 include_once('ScanDirectoryAndFile.php');
 include_once('FilterAndCountText.php');
 
-showData();
+// Change directory here
+showData('file-dir');
 
-function showData()
+function showData($directory)
 {
-    $id = processData();
+    $id = processData($directory);
     $showFile = new FilterAndCountText();
     if (!empty($id)) {
         $showFile->flag = FilterAndCountText::FIRST_COUNT;
@@ -21,11 +22,11 @@ function showData()
     $showFile->show();
 }
 
-function processData()
+function processData($directory)
 {
     $idFiles = [];
     $scannedFile = new ScanDirectoryAndFile();
-    $scannedFile->pathDir = 'file-dir';
+    $scannedFile->pathDir = $directory;
     $result = $scannedFile->scanDirectory();
     if (empty($result)) {
         echo 'Can`t find any file';
