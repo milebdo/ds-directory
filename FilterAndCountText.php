@@ -21,8 +21,8 @@ class FilterAndCountText
 
     public function __construct() {
         $servername = "localhost";
-        $username = "root";
-        $password = "qwe123";
+        $username = "dsdir";
+        $password = "dsdir";
         $dbname = "dsdir";
 
         $this->_conn = mysqli_connect($servername, $username, $password, $dbname);
