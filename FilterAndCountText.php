@@ -8,7 +8,15 @@
 class FilterAndCountText
 {
     const FIRST_COUNT = 1;
+
     public $pathFile;
+
+    public $totalFiles;
+
+    public $flag;
+
+    public $idFile = [];
+
     private $_conn;
 
     public function __construct() {
@@ -25,6 +33,11 @@ class FilterAndCountText
 
     public function show()
     {
+        if ($this->flag) {
+            foreach ($this->idFile as $key => $id) {
+                $this->_update($id, 'actionFlag', $this->flag);
+            }
+        }
         $selectData = $this->_select();
         if ($selectData) {
             foreach ($selectData as $key => $value) {
@@ -39,19 +52,31 @@ class FilterAndCountText
         $filestring = file_get_contents($this->pathFile);
         $selectData = $this->_select(null, $filestring);
         if ($selectData == false) {
-            $this->_insert($filestring, self::FIRST_COUNT);
+            return $this->_insert($filestring, self::FIRST_COUNT, $this->totalFiles);
         } else {
-            if($selectData['content'] == $filestring) {
-                $this->_update($selectData['id'], 'counter', $selectData['counter'] + self::FIRST_COUNT);
-            }
+            $this->_filterAndCount($selectData, $filestring);
+            return null;
         }
     }
 
-    private function _insert($content, $counter)
+    private function _filterAndCount($selectData, $filestring)
     {
-        $sql = 'insert into directoryList(content, counter)values("' . $content . '", ' . $counter . ')';
-        $result = $this->_conn->query($sql);
-        return $result;
+        if($selectData['totalFile'] !== $this->totalFiles) {
+            $this->_update($selectData['id'], 'totalFile', $this->totalFiles);
+
+        }
+        if ($selectData['content'] == $filestring && $selectData['actionFlag'] == 0 ||
+            $selectData['totalFile'] != $this->totalFiles) {
+            $this->_update($selectData['id'], 'counter', $selectData['counter'] + self::FIRST_COUNT);
+        }
+    }
+
+    private function _insert($content, $counter, $totalFiles)
+    {
+        $sql = 'insert into directoryList(content, counter, totalFile)values("' .
+            $content . '", ' . $counter . ', ' . $totalFiles . ')';
+        $this->_conn->query($sql);
+        return mysqli_insert_id($this->_conn);
     }
 
     private function _update($id, $coloumn, $value)

@@ -12,13 +12,18 @@ showData();
 
 function showData()
 {
-    processData();
+    $id = processData();
     $showFile = new FilterAndCountText();
+    if (!empty($id)) {
+        $showFile->flag = FilterAndCountText::FIRST_COUNT;
+        $showFile->idFile = $id;
+    }
     $showFile->show();
 }
 
 function processData()
 {
+    $idFiles = [];
     $scannedFile = new ScanDirectoryAndFile();
     $scannedFile->pathDir = 'file-dir';
     $result = $scannedFile->scanDirectory();
@@ -29,6 +34,11 @@ function processData()
     foreach ($result as $key => $file) {
         $filterFile = new FilterAndCountText();
         $filterFile->pathFile = $file;
-        $filterFile->mapingData();
+        $filterFile->totalFiles = count($result);
+        $id = $filterFile->mapingData();
+        if ($id !== null) {
+            array_push($idFiles, $id);
+        }
     }
+    return $idFiles;
 }
